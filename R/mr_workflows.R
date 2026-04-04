@@ -21,10 +21,13 @@ utils::globalVariables(c(
 get_slope_from_summary <- function(df_row, m, effect_scale) {
   if (is.null(df_row) || nrow(df_row) == 0) return(NA_real_)
 
-  col <- if (m == "PRESSO") paste0("Presso_", effect_scale)
-  else if (m == "Horse") paste0("Horse_", effect_scale)
-  else if (m == "GRIP") paste0("Grip_", effect_scale)
-  else paste0(m, "_", effect_scale)
+  # Columns are always stored with _Beta suffix regardless of scale;
+  # OR/HR values are already exponentiated in the data, so we log them back
+  # to get the log-scale slope for plotting.
+  col <- if (m == "PRESSO") "Presso"
+  else if (m == "Horse") "Horse"
+  else if (m == "GRIP") "Grip"
+  else m
 
   if (!col %in% names(df_row)) return(NA_real_)
   val <- suppressWarnings(as.numeric(df_row[[col]]))
@@ -95,7 +98,7 @@ valid.output <- function(MR_input_data,
       tryCatch({
         ivw_obj <- MendelianRandomization::mr_ivw(MRInputObject)
         result_row[["Instruments"]] <- ivw_obj@SNPs
-        result_row[["IVW_Beta"]]  <- ivw_obj@Estimate
+        result_row[["IVW"]]  <- ivw_obj@Estimate
         result_row[["IVW_Lower"]] <- ivw_obj@CILower
         result_row[["IVW_Upper"]] <- ivw_obj@CIUpper
         result_row[["IVW_P"]]     <- ivw_obj@Pvalue
@@ -104,25 +107,25 @@ valid.output <- function(MR_input_data,
         result_row[["IVW_Q_P"]]   <- heter[2]
         result_row[["Fstat"]]     <- ivw_obj@Fstat
       }, error = function(e){
-        for(nm in c("Instruments","IVW_Beta","IVW_Lower","IVW_Upper","IVW_P","IVW_Q","IVW_Q_P","Fstat")) result_row[[nm]] <- NA
+        for(nm in c("Instruments","IVW","IVW_Lower","IVW_Upper","IVW_P","IVW_Q","IVW_Q_P","Fstat")) result_row[[nm]] <- NA
       })
     } else {
-      for(nm in c("Instruments","IVW_Beta","IVW_Lower","IVW_Upper","IVW_P","IVW_Q","IVW_Q_P","Fstat")) result_row[[nm]] <- NA
+      for(nm in c("Instruments","IVW","IVW_Lower","IVW_Upper","IVW_P","IVW_Q","IVW_Q_P","Fstat")) result_row[[nm]] <- NA
     }
 
     # --- MR-RAPS ---
     if(use_raps){
       tryCatch({
         r <- mr.raps(exposure_beta, outcome_beta, exposure_se, outcome_se)
-        result_row[["RAPS_Beta"]]  <- r$beta.hat
+        result_row[["RAPS"]]  <- r$beta.hat
         result_row[["RAPS_Lower"]] <- r$beta.hat - stats::qnorm(0.975)*r$beta.se
         result_row[["RAPS_Upper"]] <- r$beta.hat + stats::qnorm(0.975)*r$beta.se
         result_row[["RAPS_P"]]     <- r$beta.p.value
       }, error = function(e){
-        for(nm in c("RAPS_Beta","RAPS_Lower","RAPS_Upper","RAPS_P")) result_row[[nm]] <- NA
+        for(nm in c("RAPS","RAPS_Lower","RAPS_Upper","RAPS_P")) result_row[[nm]] <- NA
       })
     } else {
-      for(nm in c("RAPS_Beta","RAPS_Lower","RAPS_Upper","RAPS_P")) result_row[[nm]] <- NA
+      for(nm in c("RAPS","RAPS_Lower","RAPS_Upper","RAPS_P")) result_row[[nm]] <- NA
     }
 
     if(nrow(clean_Exposure.i) > 2){
@@ -131,15 +134,15 @@ valid.output <- function(MR_input_data,
       if(use_median){
         tryCatch({
           m <- MendelianRandomization::mr_median(MRInputObject)
-          result_row[["Med_Beta"]]  <- m@Estimate
+          result_row[["Med"]]  <- m@Estimate
           result_row[["Med_Lower"]] <- m@CILower
           result_row[["Med_Upper"]] <- m@CIUpper
           result_row[["Med_P"]]     <- m@Pvalue
         }, error = function(e){
-          for(nm in c("Med_Beta","Med_Lower","Med_Upper","Med_P")) result_row[[nm]] <- NA
+          for(nm in c("Med","Med_Lower","Med_Upper","Med_P")) result_row[[nm]] <- NA
         })
       } else {
-        for(nm in c("Med_Beta","Med_Lower","Med_Upper","Med_P")) result_row[[nm]] <- NA
+        for(nm in c("Med","Med_Lower","Med_Upper","Med_P")) result_row[[nm]] <- NA
       }
 
       # --- Egger ---
@@ -147,7 +150,7 @@ valid.output <- function(MR_input_data,
         tryCatch({
           eg <- MendelianRandomization::mr_egger(MRInputObject)
           heter <- eg@Heter.Stat; if(length(heter)==1) heter <- c(heter, NA)
-          result_row[["Egger_Beta"]]       <- eg@Estimate
+          result_row[["Egger"]]       <- eg@Estimate
           result_row[["Egger_Lower"]]      <- eg@CILower.Est
           result_row[["Egger_Upper"]]      <- eg@CIUpper.Est
           result_row[["Egger_P_value"]]    <- eg@Pvalue.Est
@@ -159,12 +162,12 @@ valid.output <- function(MR_input_data,
           result_row[["Intercept_Upper"]]  <- eg@CIUpper.Int
           result_row[["Intercept_P"]]      <- eg@Pvalue.Int
         }, error = function(e){
-          for(nm in c("Egger_Beta","Egger_Lower","Egger_Upper","Egger_P_value",
+          for(nm in c("Egger","Egger_Lower","Egger_Upper","Egger_P_value",
                       "Egger_Q","Egger_Q_P","I_sq","Intercept_Est",
                       "Intercept_Lower","Intercept_Upper","Intercept_P")) result_row[[nm]] <- NA
         })
       } else {
-        for(nm in c("Egger_Beta","Egger_Lower","Egger_Upper","Egger_P_value",
+        for(nm in c("Egger","Egger_Lower","Egger_Upper","Egger_P_value",
                     "Egger_Q","Egger_Q_P","I_sq","Intercept_Est",
                     "Intercept_Lower","Intercept_Upper","Intercept_P")) result_row[[nm]] <- NA
       }
@@ -182,7 +185,7 @@ valid.output <- function(MR_input_data,
           b  <- pr$`Main MR results`[1,3]
           se <- pr$`Main MR results`[1,4]
           p  <- pr$`Main MR results`[1,6]
-          result_row[["Presso_Beta"]]  <- b
+          result_row[["Presso"]]  <- b
           result_row[["Presso_lower"]] <- b - 1.96*se
           result_row[["Presso_upper"]] <- b + 1.96*se
           result_row[["Presso_p"]]     <- p
@@ -197,10 +200,10 @@ valid.output <- function(MR_input_data,
             result_row[["outlier_Instruments"]] <- NA
           }
         }, error = function(e){
-          for(nm in c("Presso_Beta","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments")) result_row[[nm]] <- NA
+          for(nm in c("Presso","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments")) result_row[[nm]] <- NA
         })
       } else {
-        for(nm in c("Presso_Beta","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments")) result_row[[nm]] <- NA
+        for(nm in c("Presso","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments")) result_row[[nm]] <- NA
       }
 
       # --- Horse ---
@@ -212,15 +215,15 @@ valid.output <- function(MR_input_data,
                          n.iter = mr_horse_n_iter, n.burnin = mr_horse_n_burnin)
           b <- as.numeric(ho$MR_Estimate$Estimate[1])
           se <- as.numeric(ho$MR_Estimate$SD[1])
-          result_row[["Horse_Beta"]]  <- b
+          result_row[["Horse"]]  <- b
           result_row[["Horse_Lower"]] <- b - stats::qnorm(0.975)*se
           result_row[["Horse_Upper"]] <- b + stats::qnorm(0.975)*se
           result_row[["Horse_P"]]     <- 2*(1 - stats::pnorm(abs(b/se)))
         }, error = function(e){
-          for(nm in c("Horse_Beta","Horse_Lower","Horse_Upper","Horse_P")) result_row[[nm]] <- NA
+          for(nm in c("Horse","Horse_Lower","Horse_Upper","Horse_P")) result_row[[nm]] <- NA
         })
       } else {
-        for(nm in c("Horse_Beta","Horse_Lower","Horse_Upper","Horse_P")) result_row[[nm]] <- NA
+        for(nm in c("Horse","Horse_Lower","Horse_Upper","Horse_P")) result_row[[nm]] <- NA
       }
 
       # --- GRIP ---
@@ -232,43 +235,31 @@ valid.output <- function(MR_input_data,
             se_exp = exposure_se,  se_out = outcome_se,
             parameters = params
           )
-          result_row[["Grip_Beta"]]  <- as.numeric(gr$b)
+          result_row[["Grip"]]  <- as.numeric(gr$b)
           result_row[["Grip_Lower"]] <- as.numeric(gr$b - 1.96*gr$se)
           result_row[["Grip_Upper"]] <- as.numeric(gr$b + 1.96*gr$se)
           result_row[["Grip_P"]]     <- as.numeric(gr$pval)
         }, error = function(e){
-          for(nm in c("Grip_Beta","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
+          for(nm in c("Grip","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
         })
       } else {
-        for(nm in c("Grip_Beta","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
+        for(nm in c("Grip","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
       }
 
     } else {
-      for(nm in c("Med_Beta","Med_Lower","Med_Upper","Med_P",
-                  "Egger_Beta","Egger_Lower","Egger_Upper","Egger_P_value",
+      for(nm in c("Med","Med_Lower","Med_Upper","Med_P",
+                  "Egger","Egger_Lower","Egger_Upper","Egger_P_value",
                   "Egger_Q","Egger_Q_P","I_sq","Intercept_Est",
                   "Intercept_Lower","Intercept_Upper","Intercept_P",
-                  "Presso_Beta","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments",
-                  "Horse_Beta","Horse_Lower","Horse_Upper","Horse_P",
-                  "Grip_Beta","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
+                  "Presso","Presso_lower","Presso_upper","Presso_p","Presso_Instruments","outlier_Instruments",
+                  "Horse","Horse_Lower","Horse_Upper","Horse_P",
+                  "Grip","Grip_Lower","Grip_Upper","Grip_P")) result_row[[nm]] <- NA
     }
 
     results_list[[i]] <- as.data.frame(result_row, stringsAsFactors = FALSE)
   }
 
   mr_res <- do.call(rbind, results_list)
-
-  if(outcome.form %in% c("OR","HR")){
-    exp_cols <- c("IVW_Beta","RAPS_Beta","Med_Beta","Egger_Beta","Presso_Beta","Horse_Beta","Grip_Beta",
-                  "IVW_Lower","RAPS_Lower","Med_Lower","Egger_Lower","Presso_lower","Horse_Lower","Grip_Lower",
-                  "IVW_Upper","RAPS_Upper","Med_Upper","Egger_Upper","Presso_upper","Horse_Upper","Grip_Upper")
-    for(col in exp_cols) if(col %in% colnames(mr_res)) mr_res[[col]] <- exp(mr_res[[col]])
-
-    prefix <- if (outcome.form == "OR") "_OR" else "_HR"
-    for(pat in c("IVW","RAPS","Med","Egger","Presso","Horse","Grip")){
-      names(mr_res) <- sub(paste0("^",pat,"_Beta$"), paste0(pat, prefix), names(mr_res))
-    }
-  }
 
   if(all(c("Fstat","IVW_Q_P") %in% colnames(mr_res))){
     mr_res$FLe10 <- if(use_ivw) as.integer(mr_res$Fstat < 10) else NA
@@ -279,8 +270,12 @@ valid.output <- function(MR_input_data,
     mr_res$Pleiotropy <- if(use_egger) as.integer(mr_res$Intercept_P < 0.01) else NA
   }
 
-  new_order <- c("Outcome","Exposure","Instruments","Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy",
-                 setdiff(colnames(mr_res), c("Outcome","Exposure","Instruments","Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy")))
+  mr_res$Scale <- outcome.form
+
+  new_order <- c("Instruments","Outcome","Exposure","Scale",
+                 "Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy",
+                 setdiff(colnames(mr_res), c("Instruments","Outcome","Exposure","Scale",
+                   "Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy")))
   mr_res <- mr_res[, new_order]
 
   mr_res
@@ -330,6 +325,11 @@ MRplots <- function(MR_input_data,
     pvalues[[m]] <- get_p_from_summary(df_row, m)
   }
 
+  # Build y-axis label: append scale annotation for OR/HR
+  ylab_scale <- if (effect_scale == "Beta") ""
+                else paste0(" (log(", effect_scale, "))")
+  slope_label <- if (effect_scale == "Beta") "beta" else paste0("log(", effect_scale, ")")
+
   list(
     d.x          = d.x,
     d.y          = d.y,
@@ -338,7 +338,7 @@ MRplots <- function(MR_input_data,
     limx         = c(0, x_ext),
     limy         = c(-y_ext, y_ext),
     xlab         = paste(plot.xlab, exposure_label),
-    ylab         = paste(plot.ylab, outcome_label),
+    ylab         = paste0(plot.ylab, ylab_scale, " ", outcome_label),
     title        = if (!is.null(d.title)) d.title else
       paste("Exposure:", exposure_label, "\nOutcome:", outcome_label),
     subtitle     = d.subtitle,
@@ -347,7 +347,8 @@ MRplots <- function(MR_input_data,
     pvalues      = pvalues,
     method_colors = method_colors,
     method_ltys   = method_ltys,
-    show.legend  = show.legend
+    show.legend  = show.legend,
+    slope_label  = slope_label
   )
 }
 
@@ -388,7 +389,7 @@ MRplots <- function(MR_input_data,
 
     if (!is.na(b) && is.finite(b)) {
       graphics::abline(a = 0, b = b, lty = lty, lwd = 2, col = col)
-      legend_txt <- c(legend_txt, sprintf("%s: beta=%.3f, p=%.3g", m, b, pv))
+      legend_txt <- c(legend_txt, sprintf("%s: %s=%.3f, p=%.3g", m, p$slope_label, b, pv))
     } else {
       legend_txt <- c(legend_txt, sprintf("%s: failed", m))
     }
@@ -492,7 +493,27 @@ MRplots <- function(MR_input_data,
 #'   mr_horse_n_burnin = 1000,
 #'   mr_grip_parameters = NULL
 #' )
+#' }
 #'
+#' \donttest{
+#' data("merged_data")
+#' input3 <- harmonize_mr_data(df = merged_data)
+#' outcome3 <- run_mr_analysis(
+#'   MR_input_data     = input3,
+#'   outcome.form      = c("Beta","OR"), ## First outcome use Beta and second outcome use OR
+#'   use_ivw           = TRUE,
+#'   use_raps          = TRUE,
+#'   use_median        = TRUE,
+#'   use_egger         = TRUE,
+#'   use_mr_presso     = TRUE,
+#'   use_mr_horse      = TRUE,
+#'   use_mr_grip       = TRUE,
+#'   NbDistribution    = 1000,
+#'   SignifThreshold   = 0.05,
+#'   mr_horse_n_iter   = 5000,
+#'   mr_horse_n_burnin = 1000,
+#'   mr_grip_parameters = NULL
+#' )
 #' }
 #' @export
 run_mr_analysis <- function(MR_input_data,
@@ -535,7 +556,27 @@ run_mr_analysis <- function(MR_input_data,
     )
   }
 
-  do.call(rbind, results_list)
+  mr_combined <- do.call(rbind, results_list)
+
+  # Apply OR/HR exponentiation and column renaming per-outcome after rbind
+  exp_cols_beta  <- c("IVW","RAPS","Med","Egger","Presso","Horse","Grip",
+                      "IVW_Lower","RAPS_Lower","Med_Lower","Egger_Lower","Presso_lower","Horse_Lower","Grip_Lower",
+                      "IVW_Upper","RAPS_Upper","Med_Upper","Egger_Upper","Presso_upper","Horse_Upper","Grip_Upper")
+
+  for (i in seq_along(outcomes)) {
+    form <- outcome.form[i]
+    if (form %in% c("OR", "HR")) {
+      rows <- mr_combined$Outcome == outcomes[i]
+      for (col in exp_cols_beta) {
+        if (col %in% colnames(mr_combined))
+          mr_combined[rows, col] <- exp(mr_combined[rows, col])
+      }
+    }
+  }
+
+  # Rename _Beta columns to _OR or _HR where needed.
+  # Since different outcomes may use different scales, we keep _Beta as the
+  mr_combined
 }
 
 #' Plot MR Scatter Plots for Multiple Outcomes and Exposures
@@ -581,11 +622,11 @@ run_mr_analysis <- function(MR_input_data,
 #'   plots to disk with optional filtering by outcome, exposure, or both.
 #'
 #' @examples
-#' data("fi_49item")
-#' input1  <- harmonize_mr_data(df = fi_49item)
-#' outcome1 <- run_mr_analysis(
-#'   MR_input_data     = input1,
-#'   outcome.form      = "Beta",
+#' data("merged_data")
+#' input3  <- harmonize_mr_data(df = merged_data)
+#' outcome3 <- run_mr_analysis(
+#'   MR_input_data     = input3,
+#'   outcome.form      = c("Beta","OR"),
 #'   use_ivw           = TRUE,
 #'   use_raps          = FALSE,
 #'   use_median        = FALSE,
@@ -602,8 +643,8 @@ run_mr_analysis <- function(MR_input_data,
 #' \donttest{
 #' # Pass pre-calculated results to avoid rerunning the analysis
 #' plots <- plot_mr_scatter(
-#'   MR_input_data  = input1,
-#'   summary_df     = outcome1,
+#'   MR_input_data  = input3,
+#'   summary_df     = outcome3,
 #'   use_df_results = TRUE
 #' )
 #'
@@ -665,6 +706,11 @@ plot_mr_scatter <- function(MR_input_data,
 
   for (out in unique(MR_input_data$Outcome)) {
     sub_data <- subset(MR_input_data, Outcome == out)
+    # Use per-outcome Scale from summary_df if available, else fall back to effect_scale
+    out_scale <- if (!is.null(summary_df) && "Scale" %in% colnames(summary_df)) {
+      sc <- summary_df$Scale[summary_df$Outcome == out]
+      if (length(sc) > 0 && !is.na(sc[1])) sc[1] else effect_scale
+    } else effect_scale
     for (ex in unique(sub_data$Exposure)) {
       key <- paste0(out, "::", ex)
       plots_list[[key]] <- MRplots(
@@ -676,7 +722,7 @@ plot_mr_scatter <- function(MR_input_data,
         methods.plot   = methods.plot,
         show.legend    = show.legend,
         summary_df     = summary_df,
-        effect_scale   = effect_scale
+        effect_scale   = out_scale
       )
       outcomes_vec  <- c(outcomes_vec,  out)
       exposures_vec <- c(exposures_vec, ex)

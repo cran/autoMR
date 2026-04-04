@@ -79,7 +79,7 @@ new_mr_scatter_plots <- function(plots, outcomes, exposures) {
 #' @param file_type Character string; output format passed to the
 #'   corresponding \code{grDevices} device. One of \code{"pdf"},
 #'   \code{"png"}, \code{"jpeg"}, or \code{"tiff"}.
-#'   Default is \code{"pdf"}.
+#'   Default is \code{"png"}.
 #' @param width     Numeric; plot width in inches. Default is \code{8}.
 #' @param height    Numeric; plot height in inches. Default is \code{6}.
 #' @param outcome   Optional character string; if supplied, only plots
@@ -132,7 +132,7 @@ new_mr_scatter_plots <- function(plots, outcomes, exposures) {
 #' @importFrom grDevices pdf png jpeg tiff dev.off
 #' @export
 setGeneric("export_scatter_plots",
-           function(object, save_dir = tempdir(), file_type = "pdf",
+           function(object, save_dir = tempdir(), file_type = "png",
                     width = 8, height = 6,
                     outcome = NULL, exposure = NULL)
              standardGeneric("export_scatter_plots"))
@@ -141,7 +141,7 @@ setGeneric("export_scatter_plots",
 #' @importFrom grDevices pdf png jpeg tiff dev.off
 #' @export
 setMethod("export_scatter_plots", "MRScatterPlots",
-          function(object, save_dir = tempdir(), file_type = "pdf",
+          function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6,
                    outcome = NULL, exposure = NULL) {
 

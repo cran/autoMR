@@ -8,7 +8,7 @@
 export_scatter_plots(
   object,
   save_dir = tempdir(),
-  file_type = "pdf",
+  file_type = "png",
   width = 8,
   height = 6,
   outcome = NULL,
@@ -18,7 +18,7 @@ export_scatter_plots(
 \S4method{export_scatter_plots}{MRScatterPlots}(
   object,
   save_dir = tempdir(),
-  file_type = "pdf",
+  file_type = "png",
   width = 8,
   height = 6,
   outcome = NULL,
@@ -35,7 +35,7 @@ Must exist. Defaults to \code{tempdir()}.}
 \item{file_type}{Character string; output format passed to the
 corresponding \code{grDevices} device. One of \code{"pdf"},
 \code{"png"}, \code{"jpeg"}, or \code{"tiff"}.
-Default is \code{"pdf"}.}
+Default is \code{"png"}.}
 
 \item{width}{Numeric; plot width in inches. Default is \code{8}.}
 

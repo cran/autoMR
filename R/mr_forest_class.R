@@ -135,7 +135,7 @@ new_mr_forest_plots <- function(plots, outcomes, exposures) {
 #'   Must already exist. Defaults to \code{tempdir()}.
 #' @param file_type Character string; output format passed to
 #'   \code{ggplot2::ggsave()}. One of \code{"pdf"}, \code{"png"},
-#'   \code{"jpeg"}, or \code{"tiff"}. Default is \code{"pdf"}.
+#'   \code{"jpeg"}, or \code{"tiff"}. Default is \code{"png"}.
 #' @param width     Numeric; plot width in inches. Default is \code{8}.
 #' @param height    Numeric; plot height in inches. Default is \code{6}.
 #' @param dpi       Integer; resolution in dots per inch (ignored for PDF).
@@ -197,7 +197,7 @@ new_mr_forest_plots <- function(plots, outcomes, exposures) {
 #' @importFrom ggplot2 ggsave
 #' @export
 setGeneric("export_forest_plots",
-           function(object, save_dir = tempdir(), file_type = "pdf",
+           function(object, save_dir = tempdir(), file_type = "png",
                     width = 8, height = 6, dpi = 300,
                     outcome = NULL, exposure = NULL)
              standardGeneric("export_forest_plots"))
@@ -251,7 +251,7 @@ setGeneric("export_forest_plots",
 #' @importFrom ggplot2 ggsave
 #' @export
 setMethod("export_forest_plots", "GWASForestPlots",
-          function(object, save_dir = tempdir(), file_type = "pdf",
+          function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6, dpi = 300,
                    outcome = NULL, exposure = NULL) {
             .export_forest_impl(object, save_dir, file_type, width, height,
@@ -262,7 +262,7 @@ setMethod("export_forest_plots", "GWASForestPlots",
 #' @describeIn export_forest_plots Method for \code{MRForestPlots}.
 #' @export
 setMethod("export_forest_plots", "MRForestPlots",
-          function(object, save_dir = tempdir(), file_type = "pdf",
+          function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6, dpi = 300,
                    outcome = NULL, exposure = NULL) {
             .export_forest_impl(object, save_dir, file_type, width, height,

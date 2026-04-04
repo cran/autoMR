@@ -119,6 +119,26 @@ outcome2 <- run_mr_analysis(
   mr_horse_n_burnin = 1000,
   mr_grip_parameters = NULL
 )
+}
 
+\donttest{
+data("merged_data")
+input3 <- harmonize_mr_data(df = merged_data)
+outcome3 <- run_mr_analysis(
+  MR_input_data     = input3,
+  outcome.form      = c("Beta","OR"), ## First outcome use Beta and second outcome use OR
+  use_ivw           = TRUE,
+  use_raps          = TRUE,
+  use_median        = TRUE,
+  use_egger         = TRUE,
+  use_mr_presso     = TRUE,
+  use_mr_horse      = TRUE,
+  use_mr_grip       = TRUE,
+  NbDistribution    = 1000,
+  SignifThreshold   = 0.05,
+  mr_horse_n_iter   = 5000,
+  mr_horse_n_burnin = 1000,
+  mr_grip_parameters = NULL
+)
 }
 }

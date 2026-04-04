@@ -9,7 +9,7 @@
 export_forest_plots(
   object,
   save_dir = tempdir(),
-  file_type = "pdf",
+  file_type = "png",
   width = 8,
   height = 6,
   dpi = 300,
@@ -20,7 +20,7 @@ export_forest_plots(
 \S4method{export_forest_plots}{GWASForestPlots}(
   object,
   save_dir = tempdir(),
-  file_type = "pdf",
+  file_type = "png",
   width = 8,
   height = 6,
   dpi = 300,
@@ -31,7 +31,7 @@ export_forest_plots(
 \S4method{export_forest_plots}{MRForestPlots}(
   object,
   save_dir = tempdir(),
-  file_type = "pdf",
+  file_type = "png",
   width = 8,
   height = 6,
   dpi = 300,
@@ -48,7 +48,7 @@ Must already exist. Defaults to \code{tempdir()}.}
 
 \item{file_type}{Character string; output format passed to
 \code{ggplot2::ggsave()}. One of \code{"pdf"}, \code{"png"},
-\code{"jpeg"}, or \code{"tiff"}. Default is \code{"pdf"}.}
+\code{"jpeg"}, or \code{"tiff"}. Default is \code{"png"}.}
 
 \item{width}{Numeric; plot width in inches. Default is \code{8}.}
 

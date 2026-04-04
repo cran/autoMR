@@ -74,11 +74,11 @@ Mendelian Randomization (MR) method. Plot parameters are stored in an
 time, so no files are written to disk during this call.
 }
 \examples{
-data("fi_49item")
-input1  <- harmonize_mr_data(df = fi_49item)
-outcome1 <- run_mr_analysis(
-  MR_input_data     = input1,
-  outcome.form      = "Beta",
+data("merged_data")
+input3  <- harmonize_mr_data(df = merged_data)
+outcome3 <- run_mr_analysis(
+  MR_input_data     = input3,
+  outcome.form      = c("Beta","OR"),
   use_ivw           = TRUE,
   use_raps          = FALSE,
   use_median        = FALSE,
@@ -95,8 +95,8 @@ outcome1 <- run_mr_analysis(
 \donttest{
 # Pass pre-calculated results to avoid rerunning the analysis
 plots <- plot_mr_scatter(
-  MR_input_data  = input1,
-  summary_df     = outcome1,
+  MR_input_data  = input3,
+  summary_df     = outcome3,
   use_df_results = TRUE
 )
 

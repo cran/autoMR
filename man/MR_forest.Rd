@@ -7,9 +7,6 @@
 MR_forest(
   summary_df,
   effect,
-  save_plot = FALSE,
-  file_type = "jpeg",
-  save_dir = tempdir(),
   custom_xlim = NULL,
   dot_size = 3,
   axis_text_size = 10,
@@ -25,16 +22,6 @@ MR_forest(
 
 \item{effect}{Character string or vector indicating the effect scale
 ("Beta", "OR", or "HR").}
-
-\item{save_plot}{Deprecated. Plots are no longer saved inside the function.
-Use \code{export_forest_plots()} on the returned object instead.
-Ignored with a warning if supplied as \code{TRUE}.}
-
-\item{file_type}{Deprecated. Passed to \code{export_forest_plots()} instead.
-Ignored with a warning if supplied.}
-
-\item{save_dir}{Deprecated. Passed to \code{export_forest_plots()} instead.
-Ignored with a warning if supplied.}
 
 \item{custom_xlim}{Optional numeric vector of length 2 for x-axis limits.}
 
@@ -65,11 +52,11 @@ methods (e.g., IVW, RAPS, Egger).
 }
 \examples{
 \donttest{
-data("fi_49item")
-input1   <- harmonize_mr_data(df = fi_49item)
-outcome1 <- run_mr_analysis(
-  MR_input_data     = input1,
-  outcome.form      = NULL,
+data("merged_data")
+input3   <- harmonize_mr_data(df = merged_data)
+outcome3 <- run_mr_analysis(
+  MR_input_data     = input3,
+  outcome.form      = c("Beta","OR"),
   use_ivw           = TRUE,
   use_raps          = TRUE,
   use_median        = TRUE,
@@ -85,8 +72,8 @@ outcome1 <- run_mr_analysis(
 )
 
 mr_plots <- MR_forest(
-  summary_df        = outcome1,
-  effect            = "Beta",
+  summary_df        = outcome3,
+  effect            = c("Beta","OR"),
   custom_xlim       = NULL,
   dot_size          = 3,
   axis_text_size    = 10,
@@ -102,7 +89,7 @@ out_name <- mr_plots@outcomes[1]   # "fi_49item"
 exp_name <- mr_plots@exposures[1]  # "Zn"
 
 # Export all method-level plots as PDF (commented — writes to disk)
-export_forest_plots(mr_plots, save_dir = tempdir(), file_type = "pdf")
+export_forest_plots(mr_plots, save_dir = tempdir(), file_type = "png")
 
 # Export plots for one outcome only
 export_forest_plots(mr_plots, save_dir = tempdir(), outcome = out_name)

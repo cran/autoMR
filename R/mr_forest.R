@@ -19,21 +19,14 @@
 #' @return A numeric value.
 #' @noRd
 get_method_col <- function(row, method, what, eff) {
-  if (eff == "Beta") {
-    nm <- switch(what,
-                 Estimate = if (method == "PRESSO") "Presso_Beta" else if (method == "Horse") "Horse_Beta" else if (method == "GRIP") "Grip_Beta" else paste0(method, "_Beta"),
-                 Lower    = if (method == "PRESSO") "Presso_lower" else if (method == "Horse") "Horse_Lower" else if (method == "GRIP") "Grip_Lower" else paste0(method, "_Lower"),
-                 Upper    = if (method == "PRESSO") "Presso_upper" else if (method == "Horse") "Horse_Upper" else if (method == "GRIP") "Grip_Upper" else paste0(method, "_Upper"),
-                 P        = if (method == "Egger")  "Egger_P_value" else if (method == "PRESSO") "Presso_p" else if (method == "Horse") "Horse_P" else if (method == "GRIP") "Grip_P" else paste0(method, "_P")
-    )
-  } else {
-    nm <- switch(what,
-                 Estimate = if (method == "PRESSO") paste0("Presso_", eff) else if (method == "Horse") paste0("Horse_", eff) else if (method == "GRIP") paste0("Grip_", eff) else paste0(method, "_", eff),
-                 Lower    = if (method == "PRESSO") "Presso_lower" else if (method == "Horse") "Horse_Lower" else if (method == "GRIP") "Grip_Lower" else paste0(method, "_Lower"),
-                 Upper    = if (method == "PRESSO") "Presso_upper" else if (method == "Horse") "Horse_Upper" else if (method == "GRIP") "Grip_Upper" else paste0(method, "_Upper"),
-                 P        = if (method == "Egger")  "Egger_P_value" else if (method == "PRESSO") "Presso_p" else if (method == "Horse") "Horse_P" else if (method == "GRIP") "Grip_P" else paste0(method, "_P")
-    )
-  }
+  # Columns use clean names (no _Beta suffix); OR/HR values are exponentiated
+  # in the data; Lower/Upper/P names are unchanged.
+  nm <- switch(what,
+               Estimate = if (method == "PRESSO") "Presso" else if (method == "Horse") "Horse" else if (method == "GRIP") "Grip" else method,
+               Lower    = if (method == "PRESSO") "Presso_lower" else if (method == "Horse") "Horse_Lower" else if (method == "GRIP") "Grip_Lower" else paste0(method, "_Lower"),
+               Upper    = if (method == "PRESSO") "Presso_upper" else if (method == "Horse") "Horse_Upper" else if (method == "GRIP") "Grip_Upper" else paste0(method, "_Upper"),
+               P        = if (method == "Egger")  "Egger_P_value" else if (method == "PRESSO") "Presso_p" else if (method == "Horse") "Horse_P" else if (method == "GRIP") "Grip_P" else paste0(method, "_P")
+  )
 
   if (method == "GRIP" && !nm %in% names(row)) {
     alt <- sub("^Grip_", "GRIP_", nm)
@@ -63,13 +56,6 @@ get_method_col <- function(row, method, what, eff) {
 #'   Instrument, beta_exposure, se_exposure, beta_outcome, and se_outcome columns.
 #' @param report_form Character string or vector indicating the standard
 #'   output scale for each outcome (e.g., "Beta", "OR", "HR"). Defaults to "Beta".
-#' @param save_plot Deprecated. Plots are no longer saved inside the function.
-#'   Use \code{export_forest_plots()} on the returned object instead.
-#'   Ignored with a warning if supplied as \code{TRUE}.
-#' @param file_type Deprecated. Passed to \code{export_forest_plots()} instead.
-#'   Ignored with a warning if supplied.
-#' @param save_dir Deprecated. Passed to \code{export_forest_plots()} instead.
-#'   Ignored with a warning if supplied.
 #' @param xlim_custom Optional numeric vector of length 2 providing custom
 #'   limits for the x-axis. If NULL, limits are determined by the data.
 #' @param dot_size Numeric value specifying the size of the points. Default is 2.
@@ -92,12 +78,12 @@ get_method_col <- function(row, method, what, eff) {
 #'   write plots to disk with optional filtering.
 #' @examples
 #' \donttest{
-#' data("fi_49item")
-#' input1 <- harmonize_mr_data(df = fi_49item)
+#' data("merged_data")
+#' input3 <- harmonize_mr_data(df = merged_data)
 #'
 #' gwas_plots <- GWAS_forest(
-#'   MR_input_data   = input1,
-#'   report_form     = "Beta",
+#'   MR_input_data   = input3,
+#'   report_form     = c("Beta","OR"),
 #'   xlim_custom     = NULL,
 #'   dot_size        = 2,
 #'   axis_text_size  = 10,
@@ -112,25 +98,24 @@ get_method_col <- function(row, method, what, eff) {
 #' out_name <- gwas_plots@outcomes[1]   # "fi_49item"
 #' exp_name <- gwas_plots@exposures[1]  # "Zn"
 #'
-#' # Export all instrument-level plots as PDF (commented — writes to disk)
-#' export_forest_plots(gwas_plots, save_dir = tempdir(), file_type = "pdf")
+#' # Export all instrument-level plots as PNG (commented — writes to disk)
+#' # export_forest_plots(gwas_plots, save_dir = tempdir(), file_type = "jpeg")
 #'
 #' # Export plots for one outcome only
-#' export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name)
+#' # export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name)
 #'
 #' # Export plots for one exposure only
-#' export_forest_plots(gwas_plots, save_dir = tempdir(), exposure = exp_name)
+#' # export_forest_plots(gwas_plots, save_dir = tempdir(), exposure = exp_name)
 #'
 #' # Export one specific outcome-exposure pair
-#' export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name, exposure = exp_name)
+#' # export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name, exposure = exp_name)
 #' }
 #' @import ggplot2
 #' @import dplyr
 #' @importFrom MendelianRandomization mr_input mr_ivw
 #' @export
 GWAS_forest <- function(MR_input_data, report_form,
-                        save_plot = FALSE, file_type = "jpeg",
-                        save_dir = tempdir(), xlim_custom = NULL,
+                        xlim_custom = NULL,
                         dot_size = 2,
                         axis_text_size = 10,
                         axis_title_size = 12,
@@ -139,9 +124,6 @@ GWAS_forest <- function(MR_input_data, report_form,
                         plot_height = 6,
                         label_text_size = 3) {
 
-  if (isTRUE(save_plot))
-    warning("The 'save_plot' argument is deprecated. Use export_forest_plots() ",
-            "on the returned GWASForestPlots object instead.", call. = FALSE)
 
   df <- MR_input_data
 
@@ -224,13 +206,6 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' @param summary_df MR results data frame, typically the output from run_mr_analysis().
 #' @param effect Character string or vector indicating the effect scale
 #'   ("Beta", "OR", or "HR").
-#' @param save_plot Deprecated. Plots are no longer saved inside the function.
-#'   Use \code{export_forest_plots()} on the returned object instead.
-#'   Ignored with a warning if supplied as \code{TRUE}.
-#' @param file_type Deprecated. Passed to \code{export_forest_plots()} instead.
-#'   Ignored with a warning if supplied.
-#' @param save_dir Deprecated. Passed to \code{export_forest_plots()} instead.
-#'   Ignored with a warning if supplied.
 #' @param custom_xlim Optional numeric vector of length 2 for x-axis limits.
 #' @param dot_size Numeric value specifying the point size. Default is 3.
 #' @param axis_text_size Numeric value for axis font size.
@@ -247,11 +222,11 @@ GWAS_forest <- function(MR_input_data, report_form,
 #'   with optional filtering.
 #' @examples
 #' \donttest{
-#' data("fi_49item")
-#' input1   <- harmonize_mr_data(df = fi_49item)
-#' outcome1 <- run_mr_analysis(
-#'   MR_input_data     = input1,
-#'   outcome.form      = NULL,
+#' data("merged_data")
+#' input3   <- harmonize_mr_data(df = merged_data)
+#' outcome3 <- run_mr_analysis(
+#'   MR_input_data     = input3,
+#'   outcome.form      = c("Beta","OR"),
 #'   use_ivw           = TRUE,
 #'   use_raps          = TRUE,
 #'   use_median        = TRUE,
@@ -267,8 +242,8 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' )
 #'
 #' mr_plots <- MR_forest(
-#'   summary_df        = outcome1,
-#'   effect            = "Beta",
+#'   summary_df        = outcome3,
+#'   effect            = c("Beta","OR"),
 #'   custom_xlim       = NULL,
 #'   dot_size          = 3,
 #'   axis_text_size    = 10,
@@ -284,7 +259,7 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' exp_name <- mr_plots@exposures[1]  # "Zn"
 #'
 #' # Export all method-level plots as PDF (commented — writes to disk)
-#' export_forest_plots(mr_plots, save_dir = tempdir(), file_type = "pdf")
+#' export_forest_plots(mr_plots, save_dir = tempdir(), file_type = "png")
 #'
 #' # Export plots for one outcome only
 #' export_forest_plots(mr_plots, save_dir = tempdir(), outcome = out_name)
@@ -300,7 +275,6 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' @importFrom tidyr drop_na
 #' @export
 MR_forest <- function(summary_df, effect,
-                      save_plot = FALSE, file_type = "jpeg", save_dir = tempdir(),
                       custom_xlim = NULL,
                       dot_size = 3,
                       axis_text_size = 10,
@@ -310,9 +284,6 @@ MR_forest <- function(summary_df, effect,
                       plot_height = 6,
                       clamp_nonpositive = FALSE) {
 
-  if (isTRUE(save_plot))
-    warning("The 'save_plot' argument is deprecated. Use export_forest_plots() ",
-            "on the returned MRForestPlots object instead.", call. = FALSE)
 
   df <- summary_df
 

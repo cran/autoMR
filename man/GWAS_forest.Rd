@@ -7,9 +7,6 @@
 GWAS_forest(
   MR_input_data,
   report_form,
-  save_plot = FALSE,
-  file_type = "jpeg",
-  save_dir = tempdir(),
   xlim_custom = NULL,
   dot_size = 2,
   axis_text_size = 10,
@@ -26,16 +23,6 @@ Instrument, beta_exposure, se_exposure, beta_outcome, and se_outcome columns.}
 
 \item{report_form}{Character string or vector indicating the standard
 output scale for each outcome (e.g., "Beta", "OR", "HR"). Defaults to "Beta".}
-
-\item{save_plot}{Deprecated. Plots are no longer saved inside the function.
-Use \code{export_forest_plots()} on the returned object instead.
-Ignored with a warning if supplied as \code{TRUE}.}
-
-\item{file_type}{Deprecated. Passed to \code{export_forest_plots()} instead.
-Ignored with a warning if supplied.}
-
-\item{save_dir}{Deprecated. Passed to \code{export_forest_plots()} instead.
-Ignored with a warning if supplied.}
 
 \item{xlim_custom}{Optional numeric vector of length 2 providing custom
 limits for the x-axis. If NULL, limits are determined by the data.}
@@ -72,12 +59,12 @@ including a pooled IVW estimate at the top for comparison.
 }
 \examples{
 \donttest{
-data("fi_49item")
-input1 <- harmonize_mr_data(df = fi_49item)
+data("merged_data")
+input3 <- harmonize_mr_data(df = merged_data)
 
 gwas_plots <- GWAS_forest(
-  MR_input_data   = input1,
-  report_form     = "Beta",
+  MR_input_data   = input3,
+  report_form     = c("Beta","OR"),
   xlim_custom     = NULL,
   dot_size        = 2,
   axis_text_size  = 10,
@@ -92,16 +79,16 @@ gwas_plots <- GWAS_forest(
 out_name <- gwas_plots@outcomes[1]   # "fi_49item"
 exp_name <- gwas_plots@exposures[1]  # "Zn"
 
-# Export all instrument-level plots as PDF (commented — writes to disk)
-export_forest_plots(gwas_plots, save_dir = tempdir(), file_type = "pdf")
+# Export all instrument-level plots as PNG (commented — writes to disk)
+# export_forest_plots(gwas_plots, save_dir = tempdir(), file_type = "jpeg")
 
 # Export plots for one outcome only
-export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name)
+# export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name)
 
 # Export plots for one exposure only
-export_forest_plots(gwas_plots, save_dir = tempdir(), exposure = exp_name)
+# export_forest_plots(gwas_plots, save_dir = tempdir(), exposure = exp_name)
 
 # Export one specific outcome-exposure pair
-export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name, exposure = exp_name)
+# export_forest_plots(gwas_plots, save_dir = tempdir(), outcome = out_name, exposure = exp_name)
 }
 }
