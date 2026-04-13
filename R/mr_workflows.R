@@ -272,10 +272,10 @@ valid.output <- function(MR_input_data,
 
   mr_res$Scale <- outcome.form
 
-  new_order <- c("Instruments","Outcome","Exposure","Scale",
+  new_order <- c("Outcome","Exposure","Instruments","Scale",
                  "Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy",
-                 setdiff(colnames(mr_res), c("Instruments","Outcome","Exposure","Scale",
-                   "Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy")))
+                 setdiff(colnames(mr_res), c("Outcome","Exposure","Instruments","Scale",
+                                             "Presso_Instruments","outlier_Instruments","FLe10","SigQ","I2Le90","Pleiotropy")))
   mr_res <- mr_res[, new_order]
 
   mr_res
@@ -327,7 +327,7 @@ MRplots <- function(MR_input_data,
 
   # Build y-axis label: append scale annotation for OR/HR
   ylab_scale <- if (effect_scale == "Beta") ""
-                else paste0(" (log(", effect_scale, "))")
+  else paste0(" (log(", effect_scale, "))")
   slope_label <- if (effect_scale == "Beta") "beta" else paste0("log(", effect_scale, ")")
 
   list(
@@ -456,7 +456,7 @@ MRplots <- function(MR_input_data,
 #'
 #' @examples
 #' data("fi_49item")
-#' input1 <- harmonize_mr_data(df = fi_49item)
+#' input1 <- harmonize_mr_data(df = fi_49item)$input_df
 #' outcome1 <- run_mr_analysis(
 #'   MR_input_data     = input1,
 #'   outcome.form      = "Beta",
@@ -476,7 +476,7 @@ MRplots <- function(MR_input_data,
 #'
 #' \donttest{
 #' data("fried_frailty")
-#' input2 <- harmonize_mr_data(df = fried_frailty)
+#' input2 <- harmonize_mr_data(df = fried_frailty)$input_df
 #' outcome2 <- run_mr_analysis(
 #'   MR_input_data     = input2,
 #'   outcome.form      = "OR",
@@ -497,7 +497,7 @@ MRplots <- function(MR_input_data,
 #'
 #' \donttest{
 #' data("merged_data")
-#' input3 <- harmonize_mr_data(df = merged_data)
+#' input3 <- harmonize_mr_data(df = merged_data)$input_df
 #' outcome3 <- run_mr_analysis(
 #'   MR_input_data     = input3,
 #'   outcome.form      = c("Beta","OR"), ## First outcome use Beta and second outcome use OR
@@ -623,7 +623,7 @@ run_mr_analysis <- function(MR_input_data,
 #'
 #' @examples
 #' data("merged_data")
-#' input3  <- harmonize_mr_data(df = merged_data)
+#' input3  <- harmonize_mr_data(df = merged_data)$input_df
 #' outcome3 <- run_mr_analysis(
 #'   MR_input_data     = input3,
 #'   outcome.form      = c("Beta","OR"),

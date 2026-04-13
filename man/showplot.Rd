@@ -58,7 +58,7 @@ Filtering logic:
 \examples{
 \donttest{
 data("fi_49item")
-input1   <- harmonize_mr_data(df = fi_49item)
+input1   <- harmonize_mr_data(df = fi_49item)$input_df
 outcome1 <- run_mr_analysis(MR_input_data = input1)
 
 # Scatter plots

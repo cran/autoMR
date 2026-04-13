@@ -53,7 +53,7 @@ methods (e.g., IVW, RAPS, Egger).
 \examples{
 \donttest{
 data("merged_data")
-input3   <- harmonize_mr_data(df = merged_data)
+input3   <- harmonize_mr_data(df = merged_data)$input_df
 outcome3 <- run_mr_analysis(
   MR_input_data     = input3,
   outcome.form      = c("Beta","OR"),

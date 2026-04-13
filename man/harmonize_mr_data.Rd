@@ -4,24 +4,56 @@
 \alias{harmonize_mr_data}
 \title{Harmonize exposure and outcome SNP data}
 \usage{
-harmonize_mr_data(df, Outcome = NULL, Exposure = NULL)
+harmonize_mr_data(
+  df,
+  Outcome = NULL,
+  Exposure = NULL,
+  beta_sign = c("positive", "negative")
+)
 }
 \arguments{
-\item{df}{Data frame containing required columns (beta_outcome, se_outcome,
-beta_exposure, se_exposure) and metadata (Outcome, Exposure).}
+\item{df}{Data frame containing required columns: \code{beta_exposure},
+\code{se_exposure}, \code{beta_outcome}, \code{se_outcome},
+\code{Outcome}, \code{Exposure}. Allele columns may be supplied as
+\code{NEA_exposure}/\code{EA_exposure}/\code{NEA_outcome}/\code{EA_outcome},
+or as \code{ALLELE1} (NEA) / \code{ALLELE0} (EA) which are treated as
+exposure alleles.}
 
-\item{Outcome}{Optional; Character string to set as the Outcome name.}
+\item{Outcome}{Optional; character string to set as the Outcome name when
+the column is absent from \code{df}.}
 
-\item{Exposure}{Optional; Character string to set as the Exposure name.}
+\item{Exposure}{Optional; character string to set as the Exposure name when
+the column is absent from \code{df}.}
+
+\item{beta_sign}{Character string controlling the target sign for
+\code{beta_outcome} after harmonization. One of \code{"positive"}
+(default, forces beta_outcome >= 0) or \code{"negative"} (forces
+beta_outcome <= 0). When a row is flipped, \code{beta_exposure} is
+negated as a side effect and all allele columns are swapped consistently.}
 }
 \value{
-A harmonized data frame with 'Instrument' and allele columns.
+A named list with two elements:
+  \describe{
+    \item{\code{check_df}}{Full working data frame retaining all allele
+      columns after harmonization. Useful for quality-checking results.}
+    \item{\code{input_df}}{Slim data frame ready for MR analysis, with
+      columns: Instrument, beta_exposure, se_exposure, beta_outcome,
+      se_outcome, Outcome, Exposure, ALLELE1, ALLELE0, A1FREQ.}
+  }
 }
 \description{
-Harmonizes alleles and ensures consistent effect direction between exposure
-and outcome datasets. Standardizes exposure effects to be positive.
+Takes a data frame that already contains all required MR columns, aligns
+outcome alleles to the exposure strand (Step 1), then standardizes the sign
+of \code{beta_exposure} (Step 2). Returns both a full working data frame
+(\code{check_df}) and a slim, renamed input data frame (\code{input_df}),
+mirroring the output of \code{format_mr_input()}.
 }
 \examples{
-input_test3 <- harmonize_mr_data(df = fi_49item)
-head(input_test3)
+result1 <- harmonize_mr_data(df = fi_49item)
+head(result1$check_df)
+head(result1$input_df)
+
+# Force all exposure betas to be negative
+result2 <- harmonize_mr_data(df = fi_49item, beta_sign = "negative")
+head(result2$input_df)
 }

@@ -1,7 +1,7 @@
 Package: autoMR
 Type: Package
 Title: Automated Mendelian Randomization Workflows and Visualizations
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: 
     c(
       person("Kelin", "Zhong", email = "kelinzhonguconn@gmail.com", role = c("aut", "cre")),
@@ -42,8 +42,8 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.3
 NeedsCompilation: no
-Packaged: 2026-04-04 00:12:58 UTC; Colin
+Packaged: 2026-04-13 15:47:20 UTC; Colin
 Author: Kelin Zhong [aut, cre],
   Chia-Ling Kuo [aut]
 Repository: CRAN
-Date/Publication: 2026-04-04 06:20:02 UTC
+Date/Publication: 2026-04-13 18:00:14 UTC

@@ -79,7 +79,7 @@ get_method_col <- function(row, method, what, eff) {
 #' @examples
 #' \donttest{
 #' data("merged_data")
-#' input3 <- harmonize_mr_data(df = merged_data)
+#' input3 <- harmonize_mr_data(df = merged_data)$input_df
 #'
 #' gwas_plots <- GWAS_forest(
 #'   MR_input_data   = input3,
@@ -223,7 +223,7 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' @examples
 #' \donttest{
 #' data("merged_data")
-#' input3   <- harmonize_mr_data(df = merged_data)
+#' input3   <- harmonize_mr_data(df = merged_data)$input_df
 #' outcome3 <- run_mr_analysis(
 #'   MR_input_data     = input3,
 #'   outcome.form      = c("Beta","OR"),

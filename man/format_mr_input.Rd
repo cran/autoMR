@@ -14,7 +14,11 @@ format_mr_input(
   Exposure,
   ALLELE1 = NULL,
   ALLELE0 = NULL,
-  A1FREQ = NULL
+  A1FREQ = NULL,
+  ALLELE1_outcome = NULL,
+  ALLELE0_outcome = NULL,
+  A1FREQ_outcome = NULL,
+  beta_sign = c("positive", "negative")
 )
 }
 \arguments{
@@ -32,43 +36,96 @@ format_mr_input(
 
 \item{Exposure}{Character string or vector for exposure names (Mandatory).}
 
-\item{ALLELE1}{Optional character vector for non-effect alleles.}
+\item{ALLELE1}{Optional character vector for non-effect alleles (NEA) on
+the exposure strand (ALLELE1 = NEA_exposure).}
 
-\item{ALLELE0}{Optional character vector for effect alleles.}
+\item{ALLELE0}{Optional character vector for effect alleles (EA) on the
+exposure strand (ALLELE0 = EA_exposure).}
 
-\item{A1FREQ}{Optional numeric vector for effect allele frequencies.}
+\item{A1FREQ}{Optional numeric vector for effect allele frequencies
+(exposure dataset).}
+
+\item{ALLELE1_outcome}{Optional character vector for non-effect alleles in
+the outcome dataset. If \code{NULL}, assumed identical to \code{ALLELE1}.}
+
+\item{ALLELE0_outcome}{Optional character vector for effect alleles in the
+outcome dataset. If \code{NULL}, assumed identical to \code{ALLELE0}.}
+
+\item{A1FREQ_outcome}{Optional numeric vector for effect allele frequencies
+in the outcome dataset.}
+
+\item{beta_sign}{Character string controlling the target sign for
+\code{beta_outcome}. One of \code{"positive"} (default, forces
+beta_outcome >= 0) or \code{"negative"} (forces beta_outcome <= 0).
+When a row is flipped, \code{beta_exposure} is negated as a side effect
+and all allele columns are swapped consistently. Ignored when no allele
+columns are supplied (strand identity is unknown without allele information).}
 }
 \value{
-A data frame formatted for MR analysis.
+A named list with two elements:
+  \describe{
+    \item{\code{check_df}}{Full working data frame retaining all allele
+      columns (NEA_exposure, EA_exposure, NEA_outcome, EA_outcome,
+      A1FREQ_exposure, A1FREQ_outcome) after harmonization. Useful for
+      quality-checking the harmonization results.}
+    \item{\code{input_df}}{Slim data frame ready for MR analysis, with
+      columns: Instrument, beta_exposure, se_exposure, beta_outcome,
+      se_outcome, Outcome, Exposure, ALLELE1, ALLELE0, A1FREQ.}
+  }
 }
 \description{
-Format vectors into a Mendelian Randomization input data frame
+Assembles raw vectors into a working data frame, aligns outcome alleles to
+the exposure strand (Step 1), then standardizes the sign of
+\code{beta_exposure} (Step 2). Returns both a full working data frame
+(\code{check_df}) and a slim, renamed input data frame (\code{input_df}),
+mirroring the output of \code{harmonize_mr_data()}.
 }
 \examples{
 data("fi_49item")
 
-input_test1 <- format_mr_input(
-  Instrument = fi_49item$Instrument,
+# Without allele columns
+result1 <- format_mr_input(
+  Instrument    = fi_49item$Instrument,
   beta_exposure = fi_49item$beta_exposure,
-  se_exposure = fi_49item$se_exposure,
-  beta_outcome = fi_49item$beta_outcome,
-  se_outcome = fi_49item$se_outcome,
-  Outcome = fi_49item$Outcome,
-  Exposure = fi_49item$Exposure
+  se_exposure   = fi_49item$se_exposure,
+  beta_outcome  = fi_49item$beta_outcome,
+  se_outcome    = fi_49item$se_outcome,
+  Outcome       = fi_49item$Outcome,
+  Exposure      = fi_49item$Exposure
 )
-head(input_test1)
+head(result1$input_df)
 
-input_test2 <- format_mr_input(
-  Instrument = fi_49item$Instrument,
-  beta_exposure = fi_49item$beta_exposure,
-  se_exposure = fi_49item$se_exposure,
-  beta_outcome = fi_49item$beta_outcome,
-  se_outcome = fi_49item$se_outcome,
-  Outcome = fi_49item$Outcome,
-  Exposure = fi_49item$Exposure,
-  ALLELE1 = fi_49item$NEA_outcome,
-  ALLELE0 = fi_49item$EA_outcome,
-  A1FREQ = fi_49item$A1FREQ_outcome
+# With allele columns (enables alignment + sign standardization)
+result2 <- format_mr_input(
+  Instrument      = fi_49item$Instrument,
+  beta_exposure   = fi_49item$beta_exposure,
+  se_exposure     = fi_49item$se_exposure,
+  beta_outcome    = fi_49item$beta_outcome,
+  se_outcome      = fi_49item$se_outcome,
+  Outcome         = fi_49item$Outcome,
+  Exposure        = fi_49item$Exposure,
+  ALLELE1         = fi_49item$NEA_exposure,
+  ALLELE0         = fi_49item$EA_exposure,
+  A1FREQ          = fi_49item$A1FREQ_exposure,
+  ALLELE1_outcome = fi_49item$NEA_outcome,
+  ALLELE0_outcome = fi_49item$EA_outcome,
+  A1FREQ_outcome  = fi_49item$A1FREQ_outcome
 )
-head(input_test2)
+head(result2$check_df)
+head(result2$input_df)
+
+# Force all exposure betas to be negative
+result3 <- format_mr_input(
+  Instrument    = fi_49item$Instrument,
+  beta_exposure = fi_49item$beta_exposure,
+  se_exposure   = fi_49item$se_exposure,
+  beta_outcome  = fi_49item$beta_outcome,
+  se_outcome    = fi_49item$se_outcome,
+  Outcome       = fi_49item$Outcome,
+  Exposure      = fi_49item$Exposure,
+  ALLELE1       = fi_49item$NEA_exposure,
+  ALLELE0       = fi_49item$EA_exposure,
+  beta_sign     = "negative"
+)
+head(result3$input_df)
 }

@@ -60,7 +60,7 @@ including a pooled IVW estimate at the top for comparison.
 \examples{
 \donttest{
 data("merged_data")
-input3 <- harmonize_mr_data(df = merged_data)
+input3 <- harmonize_mr_data(df = merged_data)$input_df
 
 gwas_plots <- GWAS_forest(
   MR_input_data   = input3,

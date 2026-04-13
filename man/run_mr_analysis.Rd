@@ -82,7 +82,7 @@ results data frame. To save the output, use standard R functions such as
 }
 \examples{
 data("fi_49item")
-input1 <- harmonize_mr_data(df = fi_49item)
+input1 <- harmonize_mr_data(df = fi_49item)$input_df
 outcome1 <- run_mr_analysis(
   MR_input_data     = input1,
   outcome.form      = "Beta",
@@ -102,7 +102,7 @@ outcome1 <- run_mr_analysis(
 
 \donttest{
 data("fried_frailty")
-input2 <- harmonize_mr_data(df = fried_frailty)
+input2 <- harmonize_mr_data(df = fried_frailty)$input_df
 outcome2 <- run_mr_analysis(
   MR_input_data     = input2,
   outcome.form      = "OR",
@@ -123,7 +123,7 @@ outcome2 <- run_mr_analysis(
 
 \donttest{
 data("merged_data")
-input3 <- harmonize_mr_data(df = merged_data)
+input3 <- harmonize_mr_data(df = merged_data)$input_df
 outcome3 <- run_mr_analysis(
   MR_input_data     = input3,
   outcome.form      = c("Beta","OR"), ## First outcome use Beta and second outcome use OR
