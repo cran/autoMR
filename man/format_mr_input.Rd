@@ -55,9 +55,9 @@ outcome dataset. If \code{NULL}, assumed identical to \code{ALLELE0}.}
 in the outcome dataset.}
 
 \item{beta_sign}{Character string controlling the target sign for
-\code{beta_outcome}. One of \code{"positive"} (default, forces
-beta_outcome >= 0) or \code{"negative"} (forces beta_outcome <= 0).
-When a row is flipped, \code{beta_exposure} is negated as a side effect
+\code{beta_exposure}. One of \code{"positive"} (default, forces
+beta_exposure >= 0) or \code{"negative"} (forces beta_exposure <= 0).
+When a row is flipped, \code{beta_outcome} is negated as a side effect
 and all allele columns are swapped consistently. Ignored when no allele
 columns are supplied (strand identity is unknown without allele information).}
 }

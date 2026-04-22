@@ -81,11 +81,11 @@ align_outcome_alleles <- function(df) {
 apply_beta_sign <- function(df, beta_sign) {
   if (!all(c("NEA_exposure", "EA_exposure") %in% names(df))) return(df)
 
-  # Determine which rows need flipping based on beta_outcome sign
+  # Determine which rows need flipping based on beta_exposure sign
   flip_beta <- if (beta_sign == "positive") {
-    df$beta_outcome < 0   # flip rows where outcome beta is negative -> positive
+    df$beta_exposure < 0   # flip rows where exposure beta is negative -> positive
   } else {
-    df$beta_outcome > 0   # flip rows where outcome beta is positive -> negative
+    df$beta_exposure > 0   # flip rows where exposure beta is positive -> negative
   }
 
   # Flip exposure alleles (NEA <-> EA) for flagged rows
@@ -98,11 +98,11 @@ apply_beta_sign <- function(df, beta_sign) {
   df$ALLELE1 <- df$NEA_exposure
   df$ALLELE0 <- df$EA_exposure
 
-  # Mirror beta_exposure sign (side effect of strand flip)
-  df$beta_exposure <- ifelse(flip_beta, -df$beta_exposure, df$beta_exposure)
+  # Apply target sign to beta_exposure: positive -> abs(), negative -> -abs()
+  df$beta_exposure <- if (beta_sign == "positive") abs(df$beta_exposure) else -abs(df$beta_exposure)
 
-  # Apply target sign to beta_outcome: positive -> abs(), negative -> -abs()
-  df$beta_outcome <- if (beta_sign == "positive") abs(df$beta_outcome) else -abs(df$beta_outcome)
+  # Mirror beta_outcome sign (side effect of strand flip)
+  df$beta_outcome <- ifelse(flip_beta, -df$beta_outcome, df$beta_outcome)
 
   # Complement allele frequencies for flagged rows
   if ("A1FREQ_exposure" %in% names(df))
@@ -241,9 +241,9 @@ build_input_df <- function(df) {
 #' @param A1FREQ_outcome Optional numeric vector for effect allele frequencies
 #'   in the outcome dataset.
 #' @param beta_sign Character string controlling the target sign for
-#'   \code{beta_outcome}. One of \code{"positive"} (default, forces
-#'   beta_outcome >= 0) or \code{"negative"} (forces beta_outcome <= 0).
-#'   When a row is flipped, \code{beta_exposure} is negated as a side effect
+#'   \code{beta_exposure}. One of \code{"positive"} (default, forces
+#'   beta_exposure >= 0) or \code{"negative"} (forces beta_exposure <= 0).
+#'   When a row is flipped, \code{beta_outcome} is negated as a side effect
 #'   and all allele columns are swapped consistently. Ignored when no allele
 #'   columns are supplied (strand identity is unknown without allele information).
 #'
@@ -377,9 +377,9 @@ format_mr_input <- function(Instrument, beta_exposure, se_exposure, beta_outcome
 #' @param Exposure Optional; character string to set as the Exposure name when
 #'   the column is absent from \code{df}.
 #' @param beta_sign Character string controlling the target sign for
-#'   \code{beta_outcome} after harmonization. One of \code{"positive"}
-#'   (default, forces beta_outcome >= 0) or \code{"negative"} (forces
-#'   beta_outcome <= 0). When a row is flipped, \code{beta_exposure} is
+#'   \code{beta_exposure} after harmonization. One of \code{"positive"}
+#'   (default, forces beta_exposure >= 0) or \code{"negative"} (forces
+#'   beta_exposure <= 0). When a row is flipped, \code{beta_outcome} is
 #'   negated as a side effect and all allele columns are swapped consistently.
 #'
 #' @return A named list with two elements:

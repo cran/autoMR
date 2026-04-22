@@ -56,7 +56,7 @@ get_method_col <- function(row, method, what, eff) {
 #'   Instrument, beta_exposure, se_exposure, beta_outcome, and se_outcome columns.
 #' @param report_form Character string or vector indicating the standard
 #'   output scale for each outcome (e.g., "Beta", "OR", "HR"). Defaults to "Beta".
-#' @param xlim_custom Optional numeric vector of length 2 providing custom
+#' @param custom_xlim Optional numeric vector of length 2 providing custom
 #'   limits for the x-axis. If NULL, limits are determined by the data.
 #' @param dot_size Numeric value specifying the size of the points. Default is 2.
 #' @param axis_text_size Numeric value specifying the font size for axis labels.
@@ -65,12 +65,13 @@ get_method_col <- function(row, method, what, eff) {
 #'   Default is 12.
 #' @param digits Integer specifying the number of decimal places for labels.
 #'   Default is 2.
-#' @param plot_width Numeric value specifying the width of exported plot file.
-#'   Default is 8.
-#' @param plot_height Numeric value specifying the height of exported plot file.
-#'   Default is 6.
 #' @param label_text_size Numeric value specifying the size of estimate labels
 #'   (Beta/OR/HR and 95 percent CI) shown on the plot. Default is 3.
+#' @param log_scale Logical; if \code{TRUE} and \code{report_form} is
+#'   \code{"OR"} or \code{"HR"}, estimates are kept on the log scale instead
+#'   of being exponentiated. The x-axis label becomes \code{log(OR)} or
+#'   \code{log(HR)} and the reference line is drawn at 0. Default is
+#'   \code{FALSE}.
 #'
 #' @return A \code{GWASForestPlots} object containing one \code{ggplot}
 #'   per outcome-exposure pair, with instrument-level (SNP) causal estimates
@@ -84,14 +85,13 @@ get_method_col <- function(row, method, what, eff) {
 #' gwas_plots <- GWAS_forest(
 #'   MR_input_data   = input3,
 #'   report_form     = c("Beta","OR"),
-#'   xlim_custom     = NULL,
+#'   custom_xlim     = NULL,
 #'   dot_size        = 2,
 #'   axis_text_size  = 10,
 #'   axis_title_size = 12,
 #'   digits          = 2,
-#'   plot_width      = 8,
-#'   plot_height     = 6,
-#'   label_text_size = 3
+#'   label_text_size = 3,
+#'   log_scale       = FALSE
 #' )
 #'
 #' # Retrieve the exact outcome/exposure labels stored in the object
@@ -115,14 +115,13 @@ get_method_col <- function(row, method, what, eff) {
 #' @importFrom MendelianRandomization mr_input mr_ivw
 #' @export
 GWAS_forest <- function(MR_input_data, report_form,
-                        xlim_custom = NULL,
+                        custom_xlim = NULL,
                         dot_size = 2,
                         axis_text_size = 10,
                         axis_title_size = 12,
                         digits = 2,
-                        plot_width = 8,
-                        plot_height = 6,
-                        label_text_size = 3) {
+                        label_text_size = 3,
+                        log_scale = FALSE) {
 
 
   df <- MR_input_data
@@ -150,18 +149,23 @@ GWAS_forest <- function(MR_input_data, report_form,
         Upper    = Estimate + 1.96 * se_ratio
       )
 
-    if (current_form != "Beta") {
+    if (current_form != "Beta" && !log_scale) {
       df_sub <- df_sub %>% dplyr::mutate(Estimate = exp(Estimate), Lower = exp(Lower), Upper = exp(Upper))
-      ref_line <- 1
+      ref_line  <- 1
+      xlab_form <- current_form
+    } else if (current_form != "Beta" && log_scale) {
+      ref_line  <- 0
+      xlab_form <- paste0("log(", current_form, ")")
     } else {
-      ref_line <- 0
+      ref_line  <- 0
+      xlab_form <- current_form
     }
 
     MRInput      <- MendelianRandomization::mr_input(bx = df_sub$beta_exposure, bxse = df_sub$se_exposure, by = df_sub$beta_outcome, byse = df_sub$se_outcome)
     ivw_obj      <- MendelianRandomization::mr_ivw(MRInput)
-    pooled_beta  <- if (current_form != "Beta") exp(ivw_obj@Estimate) else ivw_obj@Estimate
-    pooled_lower <- if (current_form != "Beta") exp(ivw_obj@CILower) else ivw_obj@CILower
-    pooled_upper <- if (current_form != "Beta") exp(ivw_obj@CIUpper) else ivw_obj@CIUpper
+    pooled_beta  <- if (current_form != "Beta" && !log_scale) exp(ivw_obj@Estimate) else ivw_obj@Estimate
+    pooled_lower <- if (current_form != "Beta" && !log_scale) exp(ivw_obj@CILower) else ivw_obj@CILower
+    pooled_upper <- if (current_form != "Beta" && !log_scale) exp(ivw_obj@CIUpper) else ivw_obj@CIUpper
 
     pooled_row <- dplyr::tibble(Instrument = "IVW Pooled", Estimate = pooled_beta, Lower = pooled_lower, Upper = pooled_upper)
     df_plot <- df_sub %>% dplyr::select(Instrument, Estimate, Lower, Upper) %>% dplyr::bind_rows(pooled_row)
@@ -170,7 +174,7 @@ GWAS_forest <- function(MR_input_data, report_form,
     df_plot <- df_plot %>% dplyr::mutate(Instrument = factor(Instrument, levels = c("IVW Pooled", inst_order)))
 
     all_vals <- c(df_plot$Estimate, df_plot$Lower, df_plot$Upper)
-    data_limits <- if(!is.null(xlim_custom)) xlim_custom else c(min(all_vals, na.rm=TRUE), max(all_vals, na.rm=TRUE))
+    data_limits <- if(!is.null(custom_xlim)) custom_xlim else c(min(all_vals, na.rm=TRUE), max(all_vals, na.rm=TRUE))
 
     fmt_str <- paste0("%.", digits, "f [%.", digits, "f, %.", digits, "f]")
 
@@ -181,7 +185,7 @@ GWAS_forest <- function(MR_input_data, report_form,
       ggplot2::scale_x_continuous(limits = data_limits, expand = ggplot2::expansion(mult = c(0, 0.2))) +
       ggplot2::coord_cartesian(clip = "off") +
       ggplot2::geom_text(ggplot2::aes(label = sprintf(fmt_str, Estimate, Lower, Upper)), x = data_limits[2], hjust = 0, size = label_text_size) +
-      ggplot2::labs(title = paste("Exposure:", current_exposure, "\nOutcome:", current_outcome), x = current_form, y = NULL) +
+      ggplot2::labs(title = paste("Exposure:", current_exposure, "\nOutcome:", current_outcome), x = xlab_form, y = NULL) +
       ggplot2::theme_minimal() +
       ggplot2::theme(panel.grid.major = ggplot2::element_blank(), panel.grid.minor = ggplot2::element_blank(),
                      axis.text = ggplot2::element_text(size = axis_text_size), axis.title = ggplot2::element_text(size = axis_title_size),
@@ -211,10 +215,12 @@ GWAS_forest <- function(MR_input_data, report_form,
 #' @param axis_text_size Numeric value for axis font size.
 #' @param axis_title_size Numeric value for title font size.
 #' @param pval_text_size Numeric value for p-value label size.
-#' @param plot_width Width of exported plot.
-#' @param plot_height Height of exported plot.
 #' @param clamp_nonpositive Logical; whether non-positive estimates should
 #'   be clamped to a small positive value before log-transformation.
+#' @param log_scale Logical; if \code{TRUE} and \code{effect} is \code{"OR"}
+#'   or \code{"HR"}, the x-axis label shows \code{log(OR)} or \code{log(HR)}.
+#'   Note that \code{MR_forest} always plots on the log scale internally for
+#'   OR/HR; this argument only controls the axis label. Default is \code{TRUE}.
 #'
 #' @return An \code{MRForestPlots} object containing one \code{ggplot}
 #'   per outcome-exposure pair, with causal estimates compared across MR
@@ -249,9 +255,8 @@ GWAS_forest <- function(MR_input_data, report_form,
 #'   axis_text_size    = 10,
 #'   axis_title_size   = 12,
 #'   pval_text_size    = 3,
-#'   plot_width        = 8,
-#'   plot_height       = 6,
-#'   clamp_nonpositive = FALSE
+#'   clamp_nonpositive = FALSE,
+#'   log_scale         = TRUE
 #' )
 #'
 #' # Retrieve the exact outcome/exposure labels stored in the object
@@ -280,9 +285,8 @@ MR_forest <- function(summary_df, effect,
                       axis_text_size = 10,
                       axis_title_size = 12,
                       pval_text_size = 3,
-                      plot_width = 8,
-                      plot_height = 6,
-                      clamp_nonpositive = FALSE) {
+                      clamp_nonpositive = FALSE,
+                      log_scale = TRUE) {
 
 
   df <- summary_df
@@ -302,7 +306,7 @@ MR_forest <- function(summary_df, effect,
     curr_out <- outcome_exposure$Outcome[i]
     curr_exp <- outcome_exposure$Exposure[i]
     curr_eff <- as.character(outcome_exposure$effect[i])
-    xlab_val <- if(curr_eff == "Beta") curr_eff else paste0("log(",curr_eff,")")
+    xlab_val <- if(curr_eff == "Beta") curr_eff else if (log_scale) paste0("log(", curr_eff, ")") else curr_eff
 
     df_row <- df %>% dplyr::filter(Outcome == curr_out, Exposure == curr_exp)
     inst_count_label <- df_row$SNPs

@@ -12,9 +12,8 @@ MR_forest(
   axis_text_size = 10,
   axis_title_size = 12,
   pval_text_size = 3,
-  plot_width = 8,
-  plot_height = 6,
-  clamp_nonpositive = FALSE
+  clamp_nonpositive = FALSE,
+  log_scale = TRUE
 )
 }
 \arguments{
@@ -33,12 +32,13 @@ MR_forest(
 
 \item{pval_text_size}{Numeric value for p-value label size.}
 
-\item{plot_width}{Width of exported plot.}
-
-\item{plot_height}{Height of exported plot.}
-
 \item{clamp_nonpositive}{Logical; whether non-positive estimates should
 be clamped to a small positive value before log-transformation.}
+
+\item{log_scale}{Logical; if \code{TRUE} and \code{effect} is \code{"OR"}
+or \code{"HR"}, the x-axis label shows \code{log(OR)} or \code{log(HR)}.
+Note that \code{MR_forest} always plots on the log scale internally for
+OR/HR; this argument only controls the axis label. Default is \code{TRUE}.}
 }
 \value{
 An \code{MRForestPlots} object containing one \code{ggplot}
@@ -79,9 +79,8 @@ mr_plots <- MR_forest(
   axis_text_size    = 10,
   axis_title_size   = 12,
   pval_text_size    = 3,
-  plot_width        = 8,
-  plot_height       = 6,
-  clamp_nonpositive = FALSE
+  clamp_nonpositive = FALSE,
+  log_scale         = TRUE
 )
 
 # Retrieve the exact outcome/exposure labels stored in the object

@@ -16,7 +16,9 @@ plot_mr_scatter(
   show.legend = TRUE,
   summary_df = NULL,
   effect_scale = "Beta",
-  use_df_results = TRUE
+  use_df_results = TRUE,
+  custom_xlim = NULL,
+  custom_ylim = NULL
 )
 }
 \arguments{
@@ -24,7 +26,9 @@ plot_mr_scatter(
 \code{Outcome} and \code{Exposure} columns.}
 
 \item{plot.xlab}{Character string; prefix for the x-axis label.
-Default is \code{"Exposure"}.}
+Default is \code{"Exposure"}. When \code{effect_scale} is \code{"OR"} or
+\code{"HR"}, the label is automatically prefixed with \code{log(OR)} or
+\code{log(HR)}.}
 
 \item{plot.ylab}{Character string; prefix for the y-axis label.
 Default is \code{"Outcome"}.}
@@ -59,6 +63,14 @@ Default is \code{"Beta"}.}
 \item{use_df_results}{Logical; if \code{TRUE} and \code{summary_df} is
 provided, method slopes are read from \code{summary_df} instead of
 being re-calculated. Default is \code{TRUE}.}
+
+\item{custom_xlim}{Optional numeric vector of length 2 for x-axis limits.
+If \code{NULL}, limits are determined from the data. Useful for excluding
+outlier instruments from the visible range without removing them from
+the analysis.}
+
+\item{custom_ylim}{Optional numeric vector of length 2 for y-axis limits.
+If \code{NULL}, limits are determined from the data.}
 }
 \value{
 An \code{MRScatterPlots} object containing one

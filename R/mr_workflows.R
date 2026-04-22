@@ -300,7 +300,9 @@ MRplots <- function(MR_input_data,
                     methods.plot   = c("IVW","RAPS","Egger","PRESSO","Horse","GRIP"),
                     show.legend    = TRUE,
                     summary_df,
-                    effect_scale   = "Beta") {
+                    effect_scale   = "Beta",
+                    custom_xlim    = NULL,
+                    custom_ylim    = NULL) {
 
   method_colors <- c(IVW = "chartreuse3", RAPS = "turquoise3", Egger = "cornflowerblue",
                      PRESSO = "red", Horse = "purple", GRIP = "darkorange")
@@ -314,8 +316,15 @@ MRplots <- function(MR_input_data,
   d.x.se <- dat$se_exposure
   d.y.se <- dat$se_outcome
 
-  x_ext <- max(abs(d.x + d.x.se), na.rm = TRUE)
+  # Detect the sign of beta_exposure from the data so the x-axis aligns with
+  # whatever beta_sign was used in harmonize_mr_data() / format_mr_input().
+  all_positive <- all(d.x >= 0, na.rm = TRUE)
+  all_negative <- all(d.x <= 0, na.rm = TRUE)
+  x_ext <- max(abs(d.x) + d.x.se, na.rm = TRUE)
   y_ext <- max(abs(d.y + d.y.se), abs(d.y - d.y.se), na.rm = TRUE)
+
+  auto_limx <- if (all_positive) c(0, x_ext) else if (all_negative) c(-x_ext, 0) else c(-x_ext, x_ext)
+  auto_limy <- c(-y_ext, y_ext)
 
   # Pre-compute per-method slopes and p-values
   slopes  <- list()
@@ -325,9 +334,9 @@ MRplots <- function(MR_input_data,
     pvalues[[m]] <- get_p_from_summary(df_row, m)
   }
 
-  # Build y-axis label: append scale annotation for OR/HR
-  ylab_scale <- if (effect_scale == "Beta") ""
-  else paste0(" (log(", effect_scale, "))")
+  # Build axis labels: x-axis prefixed with log(OR)/log(HR) for non-Beta scales;
+  # y-axis uses plain outcome label with no scale annotation.
+  xlab_prefix <- if (effect_scale == "Beta") "" else paste0("log(", effect_scale, ") ")
   slope_label <- if (effect_scale == "Beta") "beta" else paste0("log(", effect_scale, ")")
 
   list(
@@ -335,10 +344,10 @@ MRplots <- function(MR_input_data,
     d.y          = d.y,
     d.x.se       = d.x.se,
     d.y.se       = d.y.se,
-    limx         = c(0, x_ext),
-    limy         = c(-y_ext, y_ext),
-    xlab         = paste(plot.xlab, exposure_label),
-    ylab         = paste0(plot.ylab, ylab_scale, " ", outcome_label),
+    limx         = if (!is.null(custom_xlim)) custom_xlim else auto_limx,
+    limy         = if (!is.null(custom_ylim)) custom_ylim else auto_limy,
+    xlab         = paste0(xlab_prefix, plot.xlab, " ", exposure_label),
+    ylab         = paste(plot.ylab, outcome_label),
     title        = if (!is.null(d.title)) d.title else
       paste("Exposure:", exposure_label, "\nOutcome:", outcome_label),
     subtitle     = d.subtitle,
@@ -590,7 +599,9 @@ run_mr_analysis <- function(MR_input_data,
 #' @param MR_input_data Harmonised MR input data frame. Must contain
 #'   \code{Outcome} and \code{Exposure} columns.
 #' @param plot.xlab Character string; prefix for the x-axis label.
-#'   Default is \code{"Exposure"}.
+#'   Default is \code{"Exposure"}. When \code{effect_scale} is \code{"OR"} or
+#'   \code{"HR"}, the label is automatically prefixed with \code{log(OR)} or
+#'   \code{log(HR)}.
 #' @param plot.ylab Character string; prefix for the y-axis label.
 #'   Default is \code{"Outcome"}.
 #' @param methods.plot Character vector of MR methods to overlay as
@@ -615,6 +626,12 @@ run_mr_analysis <- function(MR_input_data,
 #' @param use_df_results Logical; if \code{TRUE} and \code{summary_df} is
 #'   provided, method slopes are read from \code{summary_df} instead of
 #'   being re-calculated. Default is \code{TRUE}.
+#' @param custom_xlim Optional numeric vector of length 2 for x-axis limits.
+#'   If \code{NULL}, limits are determined from the data. Useful for excluding
+#'   outlier instruments from the visible range without removing them from
+#'   the analysis.
+#' @param custom_ylim Optional numeric vector of length 2 for y-axis limits.
+#'   If \code{NULL}, limits are determined from the data.
 #'
 #' @return An \code{MRScatterPlots} object containing one
 #'   \code{recordedplot} per outcome-exposure pair, together with outcome
@@ -684,7 +701,9 @@ plot_mr_scatter <- function(MR_input_data,
                             show.legend           = TRUE,
                             summary_df            = NULL,
                             effect_scale          = "Beta",
-                            use_df_results        = TRUE) {
+                            use_df_results        = TRUE,
+                            custom_xlim           = NULL,
+                            custom_ylim           = NULL) {
 
   MR_input_data <- ensure_dummy_vars(MR_input_data)
 
@@ -722,7 +741,9 @@ plot_mr_scatter <- function(MR_input_data,
         methods.plot   = methods.plot,
         show.legend    = show.legend,
         summary_df     = summary_df,
-        effect_scale   = out_scale
+        effect_scale   = out_scale,
+        custom_xlim    = custom_xlim,
+        custom_ylim    = custom_ylim
       )
       outcomes_vec  <- c(outcomes_vec,  out)
       exposures_vec <- c(exposures_vec, ex)

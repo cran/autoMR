@@ -26,9 +26,9 @@ the column is absent from \code{df}.}
 the column is absent from \code{df}.}
 
 \item{beta_sign}{Character string controlling the target sign for
-\code{beta_outcome} after harmonization. One of \code{"positive"}
-(default, forces beta_outcome >= 0) or \code{"negative"} (forces
-beta_outcome <= 0). When a row is flipped, \code{beta_exposure} is
+\code{beta_exposure} after harmonization. One of \code{"positive"}
+(default, forces beta_exposure >= 0) or \code{"negative"} (forces
+beta_exposure <= 0). When a row is flipped, \code{beta_outcome} is
 negated as a side effect and all allele columns are swapped consistently.}
 }
 \value{

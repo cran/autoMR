@@ -7,14 +7,13 @@
 GWAS_forest(
   MR_input_data,
   report_form,
-  xlim_custom = NULL,
+  custom_xlim = NULL,
   dot_size = 2,
   axis_text_size = 10,
   axis_title_size = 12,
   digits = 2,
-  plot_width = 8,
-  plot_height = 6,
-  label_text_size = 3
+  label_text_size = 3,
+  log_scale = FALSE
 )
 }
 \arguments{
@@ -24,7 +23,7 @@ Instrument, beta_exposure, se_exposure, beta_outcome, and se_outcome columns.}
 \item{report_form}{Character string or vector indicating the standard
 output scale for each outcome (e.g., "Beta", "OR", "HR"). Defaults to "Beta".}
 
-\item{xlim_custom}{Optional numeric vector of length 2 providing custom
+\item{custom_xlim}{Optional numeric vector of length 2 providing custom
 limits for the x-axis. If NULL, limits are determined by the data.}
 
 \item{dot_size}{Numeric value specifying the size of the points. Default is 2.}
@@ -38,14 +37,14 @@ Default is 12.}
 \item{digits}{Integer specifying the number of decimal places for labels.
 Default is 2.}
 
-\item{plot_width}{Numeric value specifying the width of exported plot file.
-Default is 8.}
-
-\item{plot_height}{Numeric value specifying the height of exported plot file.
-Default is 6.}
-
 \item{label_text_size}{Numeric value specifying the size of estimate labels
 (Beta/OR/HR and 95 percent CI) shown on the plot. Default is 3.}
+
+\item{log_scale}{Logical; if \code{TRUE} and \code{report_form} is
+\code{"OR"} or \code{"HR"}, estimates are kept on the log scale instead
+of being exponentiated. The x-axis label becomes \code{log(OR)} or
+\code{log(HR)} and the reference line is drawn at 0. Default is
+\code{FALSE}.}
 }
 \value{
 A \code{GWASForestPlots} object containing one \code{ggplot}
@@ -65,14 +64,13 @@ input3 <- harmonize_mr_data(df = merged_data)$input_df
 gwas_plots <- GWAS_forest(
   MR_input_data   = input3,
   report_form     = c("Beta","OR"),
-  xlim_custom     = NULL,
+  custom_xlim     = NULL,
   dot_size        = 2,
   axis_text_size  = 10,
   axis_title_size = 12,
   digits          = 2,
-  plot_width      = 8,
-  plot_height     = 6,
-  label_text_size = 3
+  label_text_size = 3,
+  log_scale       = FALSE
 )
 
 # Retrieve the exact outcome/exposure labels stored in the object
