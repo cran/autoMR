@@ -73,10 +73,13 @@ the analysis.}
 If \code{NULL}, limits are determined from the data.}
 }
 \value{
-An \code{MRScatterPlots} object containing one
-  \code{recordedplot} per outcome-exposure pair, together with outcome
-  and exposure metadata. Use \code{export_scatter_plots()} to write
-  plots to disk with optional filtering by outcome, exposure, or both.
+An \code{MRScatterPlots} object containing one plot parameter list
+  per outcome-exposure pair, together with outcome and exposure metadata.
+  Each parameter list holds all data and settings needed to render the plot
+  on demand — including \code{show.legend} — so settings like
+  \code{show.legend = FALSE} are correctly applied at export time.
+  Use \code{export_scatter_plots()} to write plots to disk with optional
+  filtering by outcome, exposure, or both.
 }
 \description{
 Generates one scatter plot per outcome-exposure pair using base R

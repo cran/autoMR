@@ -2,33 +2,9 @@
 % Please edit documentation in R/mr_forest_class.R
 \name{export_forest_plots}
 \alias{export_forest_plots}
-\alias{export_forest_plots,GWASForestPlots-method}
-\alias{export_forest_plots,MRForestPlots-method}
 \title{Export MR Forest Plots to Disk}
 \usage{
 export_forest_plots(
-  object,
-  save_dir = tempdir(),
-  file_type = "png",
-  width = 8,
-  height = 6,
-  dpi = 300,
-  outcome = NULL,
-  exposure = NULL
-)
-
-\S4method{export_forest_plots}{GWASForestPlots}(
-  object,
-  save_dir = tempdir(),
-  file_type = "png",
-  width = 8,
-  height = 6,
-  dpi = 300,
-  outcome = NULL,
-  exposure = NULL
-)
-
-\S4method{export_forest_plots}{MRForestPlots}(
   object,
   save_dir = tempdir(),
   file_type = "png",
@@ -89,13 +65,6 @@ File names are prefixed with \code{Instrument_forest_} for
 \code{<Outcome>_<Exposure>.<file_type>} with spaces replaced by
 underscores.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{export_forest_plots(GWASForestPlots)}: Method for \code{GWASForestPlots}.
-
-\item \code{export_forest_plots(MRForestPlots)}: Method for \code{MRForestPlots}.
-
-}}
 \examples{
 \donttest{
 data("fi_49item")

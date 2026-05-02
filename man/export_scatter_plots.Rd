@@ -2,20 +2,9 @@
 % Please edit documentation in R/mr_scatter_class.R
 \name{export_scatter_plots}
 \alias{export_scatter_plots}
-\alias{export_scatter_plots,MRScatterPlots-method}
 \title{Export MR Scatter Plots to Disk}
 \usage{
 export_scatter_plots(
-  object,
-  save_dir = tempdir(),
-  file_type = "png",
-  width = 8,
-  height = 6,
-  outcome = NULL,
-  exposure = NULL
-)
-
-\S4method{export_scatter_plots}{MRScatterPlots}(
   object,
   save_dir = tempdir(),
   file_type = "png",
@@ -70,11 +59,6 @@ File names follow the pattern
 \code{Scatter_<Outcome>_<Exposure>.<file_type>} with spaces replaced
 by underscores.
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{export_scatter_plots(MRScatterPlots)}: Method for \code{MRScatterPlots}.
-
-}}
 \examples{
 \donttest{
 data("fi_49item")

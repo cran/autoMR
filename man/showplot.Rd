@@ -2,18 +2,9 @@
 % Please edit documentation in R/mr_scatter_class.R
 \name{showplot}
 \alias{showplot}
-\alias{showplot,MRScatterPlots-method}
-\alias{showplot,GWASForestPlots-method}
-\alias{showplot,MRForestPlots-method}
 \title{Display MR Plots on Screen}
 \usage{
 showplot(object, outcome = NULL, exposure = NULL)
-
-\S4method{showplot}{MRScatterPlots}(object, outcome = NULL, exposure = NULL)
-
-\S4method{showplot}{GWASForestPlots}(object, outcome = NULL, exposure = NULL)
-
-\S4method{showplot}{MRForestPlots}(object, outcome = NULL, exposure = NULL)
 }
 \arguments{
 \item{object}{An \code{MRScatterPlots}, \code{GWASForestPlots}, or
@@ -46,15 +37,6 @@ Filtering logic:
   \item \strong{Neither supplied} — displays every plot in the object.
 }
 }
-\section{Methods (by class)}{
-\itemize{
-\item \code{showplot(MRScatterPlots)}: Display scatter plots from an \code{MRScatterPlots} object.
-
-\item \code{showplot(GWASForestPlots)}: Display forest plots from a \code{GWASForestPlots} object.
-
-\item \code{showplot(MRForestPlots)}: Display forest plots from an \code{MRForestPlots} object.
-
-}}
 \examples{
 \donttest{
 data("fi_49item")

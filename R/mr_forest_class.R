@@ -36,6 +36,7 @@
 #'     \code{exposure}, or both to export a subset.}
 #' }
 #' @importFrom methods setClass setValidity new
+#' @keywords internal
 #' @export
 setClass("GWASForestPlots", representation(
   plots     = "list",
@@ -79,6 +80,7 @@ setValidity("GWASForestPlots", function(object) {
 #'     Saves plots to disk. Optionally filter by \code{outcome},
 #'     \code{exposure}, or both to export a subset.}
 #' }
+#' @keywords internal
 #' @export
 setClass("MRForestPlots", representation(
   plots     = "list",
@@ -247,9 +249,19 @@ setGeneric("export_forest_plots",
   invisible(object)
 }
 
-#' @describeIn export_forest_plots Method for \code{GWASForestPlots}.
-#' @importFrom ggplot2 ggsave
-#' @export
+
+#' S4 methods for export_forest_plots
+#'
+#' Internal aliases used to document the concrete S4 methods for
+#' \code{export_forest_plots}. Users should normally consult
+#' \code{?export_forest_plots}.
+#'
+#' @name export_forest_plots-methods
+#' @aliases export_forest_plots,GWASForestPlots-method
+#' @aliases export_forest_plots,MRForestPlots-method
+#' @keywords internal
+NULL
+
 setMethod("export_forest_plots", "GWASForestPlots",
           function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6, dpi = 300,
@@ -259,8 +271,6 @@ setMethod("export_forest_plots", "GWASForestPlots",
                                 fname_prefix = "Instrument_forest_")
           })
 
-#' @describeIn export_forest_plots Method for \code{MRForestPlots}.
-#' @export
 setMethod("export_forest_plots", "MRForestPlots",
           function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6, dpi = 300,

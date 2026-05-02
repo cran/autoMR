@@ -31,6 +31,7 @@
 #'     \code{exposure}, or both to export a subset.}
 #' }
 #' @importFrom methods setClass setValidity new
+#' @keywords internal
 #' @export
 setClass("MRScatterPlots", representation(
   plots     = "list",
@@ -137,9 +138,18 @@ setGeneric("export_scatter_plots",
                     outcome = NULL, exposure = NULL)
              standardGeneric("export_scatter_plots"))
 
-#' @describeIn export_scatter_plots Method for \code{MRScatterPlots}.
-#' @importFrom grDevices pdf png jpeg tiff dev.off
-#' @export
+
+#' S4 methods for export_scatter_plots
+#'
+#' Internal aliases used to document the concrete S4 method for
+#' \code{export_scatter_plots}. Users should normally consult
+#' \code{?export_scatter_plots}.
+#'
+#' @name export_scatter_plots-methods
+#' @aliases export_scatter_plots,MRScatterPlots-method
+#' @keywords internal
+NULL
+
 setMethod("export_scatter_plots", "MRScatterPlots",
           function(object, save_dir = tempdir(), file_type = "png",
                    width = 8, height = 6,
@@ -267,13 +277,29 @@ setMethod("export_scatter_plots", "MRScatterPlots",
 #' showplot(mr_plots, outcome = "fi_49item", exposure = "Zn")
 #' }
 #' @importFrom methods setGeneric setMethod
+#' @importFrom graphics plot
 #' @export
 setGeneric("showplot",
            function(object, outcome = NULL, exposure = NULL)
              standardGeneric("showplot"))
 
-#' @describeIn showplot Display scatter plots from an \code{MRScatterPlots} object.
-#' @export
+
+# ------------------------------------------------------------------------------
+# Internal S4 method documentation
+# ------------------------------------------------------------------------------
+
+#' S4 methods for showplot
+#'
+#' Internal documentation entries for S4 methods. These aliases satisfy
+#' R CMD check without creating user-facing method help pages.
+#'
+#' @name showplot-methods
+#' @aliases showplot,MRScatterPlots-method
+#' @aliases showplot,GWASForestPlots-method
+#' @aliases showplot,MRForestPlots-method
+#' @keywords internal
+NULL
+
 setMethod("showplot", "MRScatterPlots", function(object, outcome = NULL, exposure = NULL) {
   idx <- .showplot_filter(object, outcome, exposure)
   for (i in idx) {
@@ -282,9 +308,6 @@ setMethod("showplot", "MRScatterPlots", function(object, outcome = NULL, exposur
   invisible(object)
 })
 
-#' @describeIn showplot Display forest plots from a \code{GWASForestPlots} object.
-#' @importFrom graphics plot
-#' @export
 setMethod("showplot", "GWASForestPlots", function(object, outcome = NULL, exposure = NULL) {
   idx <- .showplot_filter(object, outcome, exposure)
   for (i in idx) {
@@ -293,8 +316,6 @@ setMethod("showplot", "GWASForestPlots", function(object, outcome = NULL, exposu
   invisible(object)
 })
 
-#' @describeIn showplot Display forest plots from an \code{MRForestPlots} object.
-#' @export
 setMethod("showplot", "MRForestPlots", function(object, outcome = NULL, exposure = NULL) {
   idx <- .showplot_filter(object, outcome, exposure)
   for (i in idx) {

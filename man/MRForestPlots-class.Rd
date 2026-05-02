@@ -33,3 +33,4 @@ pattern \code{"Outcome::Exposure"}.}
 }
 }
 
+\keyword{internal}

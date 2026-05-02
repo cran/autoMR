@@ -364,10 +364,12 @@ MRplots <- function(MR_input_data,
 #' Internal scatter plot renderer
 #'
 #' Draws one scatter plot onto the currently active graphics device using
-#' the parameter list produced by \code{MRplots()}.  Must be called while
-#' a device is already open.
+#' the parameter list produced by \code{MRplots()}. Must be called while
+#' a device is already open. Called by \code{export_scatter_plots()} at
+#' export time, ensuring all stored settings including \code{show.legend}
+#' are correctly applied.
 #'
-#' @noRd
+#' @keywords internal
 .draw_scatter_plot <- function(p) {
 
   graphics::plot(
@@ -633,10 +635,13 @@ run_mr_analysis <- function(MR_input_data,
 #' @param custom_ylim Optional numeric vector of length 2 for y-axis limits.
 #'   If \code{NULL}, limits are determined from the data.
 #'
-#' @return An \code{MRScatterPlots} object containing one
-#'   \code{recordedplot} per outcome-exposure pair, together with outcome
-#'   and exposure metadata. Use \code{export_scatter_plots()} to write
-#'   plots to disk with optional filtering by outcome, exposure, or both.
+#' @return An \code{MRScatterPlots} object containing one plot parameter list
+#'   per outcome-exposure pair, together with outcome and exposure metadata.
+#'   Each parameter list holds all data and settings needed to render the plot
+#'   on demand — including \code{show.legend} — so settings like
+#'   \code{show.legend = FALSE} are correctly applied at export time.
+#'   Use \code{export_scatter_plots()} to write plots to disk with optional
+#'   filtering by outcome, exposure, or both.
 #'
 #' @examples
 #' data("merged_data")
